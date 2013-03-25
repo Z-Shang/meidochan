@@ -1,2 +1,2 @@
 all:
-	gcc -o meidochan meidochan.c `pkg-config --cflags --tags gtk+-2.0`
+	gcc -o meidochan meidochan.c `pkg-config --cflags --libs gtk+-2.0`
