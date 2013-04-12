@@ -1,0 +1,11 @@
+width = 620
+height = 260
+mask = "/path/to/your/mask.png"
+msg = "Welcome\nZ.Shang\nSama!\n"
+msgx = 325
+msgy = 50
+msgw = 12
+txtx = 0
+txty = 220
+txtw = 490
+txth = 40
