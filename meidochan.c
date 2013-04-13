@@ -48,28 +48,42 @@ int main(int argc, char *argv[]) {
 	char *msg;
 	int width, height;
 	char *mask;
+	int msgx, msgy, msgw, txtx, txty, txtw, txth;
 	char *rcpath = getenv("HOME");
 	strcat(rcpath,"/.meidochan/rc.lua");
 	if(luaL_loadfile(L, rcpath)!=0){
 		msg = "Welcome\nMaster\nSama!~";
 		width = 620;
 		height = 260;
-		mask = "/path/to/your/mask.png";
+		mask = "/default/path/to/your/mask.png";
 	}
 	else{
 	lua_pcall(L, 0, 0, 0);
 	lua_getglobal(L, "msg");
 	msg = (char *)lua_tostring(L, 1);
-	//printf("%s\n", msg);
+//	printf("%s\n", msg);
 	lua_getglobal(L, "width");
 	width = (int)lua_tointeger(L, 2);
-	//printf("%d\n", width);
+//	printf("%d\n", width);
 	lua_getglobal(L, "height");
 	height = (int)lua_tointeger(L, 3);
-	//printf("%d\n", height);
+//	printf("%d\n", height);
 	lua_getglobal(L, "mask");
 	mask = (char *)lua_tostring(L, 4);
-	//printf("%s\n", mask);
+	lua_getglobal(L, "msgx");
+	msgx = (int)lua_tointeger(L, 5);
+	lua_getglobal(L, "msgy");
+	msgy = (int)lua_tointeger(L, 6);
+	lua_getglobal(L, "msgw");
+	msgw = (int)lua_tointeger(L, 7);
+	lua_getglobal(L, "txtx");
+	txtx = (int)lua_tointeger(L, 8);
+	lua_getglobal(L, "txty");
+	txty = (int)lua_tointeger(L, 9);
+	lua_getglobal(L, "txtw");
+	txtw = (int)lua_tointeger(L, 10);
+	lua_getglobal(L, "txth");
+	txth = (int)lua_tointeger(L, 11);
 	}
 	/*
 	 * Done reading from lua file
@@ -105,13 +119,13 @@ int main(int argc, char *argv[]) {
 	/* Welcome message done */
 
 	gtk_label_set_markup(GTK_LABEL(lbl_welcome), wel_msg);
-	gtk_label_set_width_chars(GTK_LABEL(lbl_welcome), 12);
+	gtk_label_set_width_chars(GTK_LABEL(lbl_welcome), msgw);
 	gtk_misc_set_alignment(GTK_MISC(lbl_welcome),0.5,0);
 	fixed = gtk_fixed_new();
 	gtk_container_add(GTK_CONTAINER(wd_main),fixed);
-	gtk_widget_set_size_request(txt_main, 490, 40);
-	gtk_fixed_put(GTK_FIXED(fixed),txt_main,0,220);
-	gtk_fixed_put(GTK_FIXED(fixed),lbl_welcome,325,50);
+	gtk_widget_set_size_request(txt_main, txtw, txth);
+	gtk_fixed_put(GTK_FIXED(fixed),txt_main, txtx, txty);
+	gtk_fixed_put(GTK_FIXED(fixed), lbl_welcome, msgx, msgy);
 	g_signal_connect(G_OBJECT(wd_main), "delete_event", 
 			G_CALLBACK(gtk_main_quit), NULL);
 	g_signal_connect(G_OBJECT(txt_main), "activate", 
