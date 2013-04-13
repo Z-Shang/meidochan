@@ -1,4 +1,5 @@
 Before using it, please create a directory "~/.meidochan" and put the mask.png and rc.lua in it.
+Also don't forget to change the default path in both meidochan.c and rc.lua
 
 If you have any question please feel free to send an E-mail to shangzhanlin@gmail.com
 
