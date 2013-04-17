@@ -16,6 +16,20 @@ GtkWidget *txt_main;
 GtkWidget *wd_main;
 GtkWidget *wd_alarm;
 
+char *lgetstring(lua_State *L, char *str) {
+	lua_getglobal(L, str);
+	char *temp = (char *)lua_tostring(L, 1);
+	lua_pop(L, 1);
+	return temp;
+}
+
+int lgetint(lua_State *L, char *str) {
+	lua_getglobal(L, str);
+	int temp = (char *)lua_tointeger(L, 1);
+	lua_pop(L, 1);
+	return temp;
+}
+
 void f_run(GtkWidget *widget, gpointer *data) {
 	const gchar *cmd;
 	cmd = gtk_entry_get_text (GTK_ENTRY (txt_main));
@@ -55,35 +69,22 @@ int main(int argc, char *argv[]) {
 		msg = "Welcome\nMaster\nSama!~";
 		width = 620;
 		height = 260;
-		mask = "/default/path/to/your/mask.png";
+		mask = "/your/home/path/.meidochan/mask.png";
 	}
 	else{
 	lua_pcall(L, 0, 0, 0);
-	lua_getglobal(L, "msg");
-	msg = (char *)lua_tostring(L, 1);
+	msg = lgetstring(L, "msg");
 //	printf("%s\n", msg);
-	lua_getglobal(L, "width");
-	width = (int)lua_tointeger(L, 2);
-//	printf("%d\n", width);
-	lua_getglobal(L, "height");
-	height = (int)lua_tointeger(L, 3);
-//	printf("%d\n", height);
-	lua_getglobal(L, "mask");
-	mask = (char *)lua_tostring(L, 4);
-	lua_getglobal(L, "msgx");
-	msgx = (int)lua_tointeger(L, 5);
-	lua_getglobal(L, "msgy");
-	msgy = (int)lua_tointeger(L, 6);
-	lua_getglobal(L, "msgw");
-	msgw = (int)lua_tointeger(L, 7);
-	lua_getglobal(L, "txtx");
-	txtx = (int)lua_tointeger(L, 8);
-	lua_getglobal(L, "txty");
-	txty = (int)lua_tointeger(L, 9);
-	lua_getglobal(L, "txtw");
-	txtw = (int)lua_tointeger(L, 10);
-	lua_getglobal(L, "txth");
-	txth = (int)lua_tointeger(L, 11);
+	mask = lgetstring(L, "mask");
+	width = lgetint(L, "width");
+	height = lgetint(L, "height");
+	msgx = lgetint(L, "msgx");
+	msgy = lgetint(L, "msgy");
+	msgw = lgetint(L, "msgw");
+	txtx = lgetint(L, "txtx");
+	txty = lgetint(L, "txty");
+	txtw = lgetint(L, "txtw");
+	txth = lgetint(L, "txth");
 	}
 	/*
 	 * Done reading from lua file

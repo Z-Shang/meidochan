@@ -1,6 +1,6 @@
 width = 620
 height = 260
-mask = "/path/to/your/mask.png"
+mask = "/your/home/path/.meidochan/mask.png"
 msg = "Welcome\nZ.Shang\nSama!\n"
 msgx = 325
 msgy = 50
