@@ -11,12 +11,17 @@
 #include<lua.h>
 #include<lauxlib.h>
 #include<lualib.h>
+#include"envp.h"
 
 GtkWidget *txt_main;
 GtkWidget *wd_main;
 GtkWidget *wd_alarm;
 
+lua_State *L;
+char *e[255];
+
 char *lgetstring(lua_State *L, char *str) {
+	lua_pcall(L, 0, 0, 0);
 	lua_getglobal(L, str);
 	char *temp = (char *)lua_tostring(L, 1);
 	lua_pop(L, 1);
@@ -24,15 +29,16 @@ char *lgetstring(lua_State *L, char *str) {
 }
 
 int lgetint(lua_State *L, char *str) {
+	lua_pcall(L, 0, 0, 0);
 	lua_getglobal(L, str);
-	int temp = (char *)lua_tointeger(L, 1);
+	int temp = (int)lua_tointeger(L, 1);
 	lua_pop(L, 1);
 	return temp;
 }
 
 void f_run(GtkWidget *widget, gpointer *data) {
-	const gchar *cmd;
-	cmd = gtk_entry_get_text (GTK_ENTRY (txt_main));
+	gchar *cmd;
+	cmd = (gchar *)gtk_entry_get_text (GTK_ENTRY (txt_main));
 	char *result = NULL;
 	int i = 0;
 	char *arg[10]={NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL};
@@ -42,11 +48,27 @@ void f_run(GtkWidget *widget, gpointer *data) {
 		i++;
 		result = strtok(NULL, " ");
 	}
-	execvp(cmd,arg);
+//	printf("%s\t%s%s\n",cmd, arg[0], arg[1]);
+	execvpe(cmd,arg,e);
 	gtk_main_quit();
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[], char *envp[]) {
+//	printf("%ld\n",sizeof(envp));
+
+	int k=0;
+	while(envp[k]!=NULL){
+		k++;
+	}
+//	printf("%s\t%d\n",envp[k],k);
+
+	char *ep[k];
+	int h;
+	for(h=0;h<k;h++){
+		ep[h] = envp[h];
+	}
+	memcpy(e,ep,k);
+
 	GdkPixbuf *pixbuf = NULL;
 	GdkBitmap *bitmap = NULL;
 	GdkPixmap *pixmap = NULL;
@@ -56,12 +78,11 @@ int main(int argc, char *argv[]) {
 	/*
 	 * Get string from lua file
 	 */
-	lua_State *L;
 	L = luaL_newstate();
 	luaL_openlibs(L);
 	char *msg;
-	int width, height;
 	char *mask;
+	int width, height;
 	int msgx, msgy, msgw, txtx, txty, txtw, txth;
 	char *rcpath = getenv("HOME");
 	strcat(rcpath,"/.meidochan/rc.lua");
@@ -72,7 +93,6 @@ int main(int argc, char *argv[]) {
 		mask = "/your/home/path/.meidochan/mask.png";
 	}
 	else{
-	lua_pcall(L, 0, 0, 0);
 	msg = lgetstring(L, "msg");
 //	printf("%s\n", msg);
 	mask = lgetstring(L, "mask");
@@ -132,8 +152,8 @@ int main(int argc, char *argv[]) {
 	g_signal_connect(G_OBJECT(txt_main), "activate", 
 			GTK_SIGNAL_FUNC(f_run), G_CALLBACK(f_run));
 	gtk_widget_show_all(wd_main);
-	gtk_main();
 	lua_close(L);
+	gtk_main();
 	return 0;
 }
 
