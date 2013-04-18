@@ -11,28 +11,26 @@
 #include<lua.h>
 #include<lauxlib.h>
 #include<lualib.h>
-#include"envp.h"
 
 GtkWidget *txt_main;
 GtkWidget *wd_main;
 GtkWidget *wd_alarm;
 
 lua_State *L;
-char *e[255];
+FILE *fp;
+int l_index=1;
 
 char *lgetstring(lua_State *L, char *str) {
-	lua_pcall(L, 0, 0, 0);
 	lua_getglobal(L, str);
-	char *temp = (char *)lua_tostring(L, 1);
-	lua_pop(L, 1);
+	char *temp = (char *)lua_tostring(L, l_index);
+	l_index++;
 	return temp;
 }
 
 int lgetint(lua_State *L, char *str) {
-	lua_pcall(L, 0, 0, 0);
 	lua_getglobal(L, str);
-	int temp = (int)lua_tointeger(L, 1);
-	lua_pop(L, 1);
+	int temp = (int)lua_tointeger(L, l_index);
+	l_index++;
 	return temp;
 }
 
@@ -48,27 +46,28 @@ void f_run(GtkWidget *widget, gpointer *data) {
 		i++;
 		result = strtok(NULL, " ");
 	}
-//	printf("%s\t%s%s\n",cmd, arg[0], arg[1]);
-	execvpe(cmd,arg,e);
+	
+	pid_t pid;
+
+	if((pid=fork())==0){
+		if(vfork()==0){
+			printf("VFork succeed\n");
+			chdir(getenv("HOME"));
+			char * const ev[] = {"TERM=meidochan","DISPLAY=:0",NULL};
+			execvpe(cmd,arg,ev);
+			exit(0);
+		}
+		else{
+			exit(0);
+		}
+	}
+	else{
+		wait(NULL);
+	}
 	gtk_main_quit();
 }
 
-int main(int argc, char *argv[], char *envp[]) {
-//	printf("%ld\n",sizeof(envp));
-
-	int k=0;
-	while(envp[k]!=NULL){
-		k++;
-	}
-//	printf("%s\t%d\n",envp[k],k);
-
-	char *ep[k];
-	int h;
-	for(h=0;h<k;h++){
-		ep[h] = envp[h];
-	}
-	memcpy(e,ep,k);
-
+int main(int argc, char *argv[]) {
 	GdkPixbuf *pixbuf = NULL;
 	GdkBitmap *bitmap = NULL;
 	GdkPixmap *pixmap = NULL;
@@ -93,8 +92,8 @@ int main(int argc, char *argv[], char *envp[]) {
 		mask = "/your/home/path/.meidochan/mask.png";
 	}
 	else{
+	lua_pcall(L, 0, 0, 0);
 	msg = lgetstring(L, "msg");
-//	printf("%s\n", msg);
 	mask = lgetstring(L, "mask");
 	width = lgetint(L, "width");
 	height = lgetint(L, "height");
@@ -109,7 +108,6 @@ int main(int argc, char *argv[], char *envp[]) {
 	/*
 	 * Done reading from lua file
 	 */
-
 	gtk_init(&argc, &argv);
 
 	wd_main = gtk_window_new(GTK_WINDOW_TOPLEVEL);
@@ -149,11 +147,10 @@ int main(int argc, char *argv[], char *envp[]) {
 	gtk_fixed_put(GTK_FIXED(fixed), lbl_welcome, msgx, msgy);
 	g_signal_connect(G_OBJECT(wd_main), "delete_event", 
 			G_CALLBACK(gtk_main_quit), NULL);
+	lua_close(L);
 	g_signal_connect(G_OBJECT(txt_main), "activate", 
 			GTK_SIGNAL_FUNC(f_run), G_CALLBACK(f_run));
 	gtk_widget_show_all(wd_main);
-	lua_close(L);
 	gtk_main();
 	return 0;
 }
-
